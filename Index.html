@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Курсы Антона Данилова</title>
+<meta name="description" content="Курсы по 3D-графике, Unreal Engine 5 и видео с нейросетями для взрослых. Преподаёт Антон Данилов, 20+ лет в графике для игр, рекламы и кино.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Onest:wght@400;600;700&display=swap">
+<style>
+/* Layout: тёмный холст нодового редактора. Первый экран — граф «цель → курс → курс», ниже карточки курсов, путь преподавателя и контакты. Одна тема по замыслу. */
+:root{
+  --bg:#15171b;
+  --panel:#22252b;
+  --panel-dim:#1c1f24;
+  --line:#3a3f49;
+  --wire:#4a505c;
+  --ink:#e8eaee;
+  --muted:#aeb4bf;
+  --faint:#8b93a1;
+  --accent:#fb923c;
+  --accent-soft:#fdba74;
+  --on-accent:#15171b;
+  --display:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background-color:var(--bg);background-image:radial-gradient(#2c3038 1.2px,transparent 1.3px);background-size:28px 28px;color:var(--ink);font-family:var(--display);font-size:17px;line-height:1.55}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent-soft);outline-offset:3px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(16px,5vw,80px)}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+h1,h2,h3{text-wrap:balance;margin:0}
+h1{font-size:clamp(34px,4.6vw,56px);line-height:1.05;letter-spacing:-.02em;font-weight:700}
+h2{font-size:clamp(28px,3.2vw,40px);line-height:1.1;letter-spacing:-.02em;font-weight:700}
+h3{font-size:21px;line-height:1.2;font-weight:700}
+p{margin:0}
+
+/* Шапка */
+.nav{display:flex;flex-wrap:wrap;align-items:center;gap:8px 32px;padding:24px 0}
+.nav .brand{font-weight:700;font-size:20px;text-decoration:none;margin-right:auto}
+.nav a{text-decoration:none;font-size:16px;padding:10px 0}
+.nav a:hover{color:var(--accent-soft)}
+.nav .cta{border:1.5px solid var(--ink);border-radius:8px;padding:10px 20px;font-weight:600}
+
+/* Первый экран */
+.hero{padding-top:32px;padding-bottom:72px}
+.hero-text{max-width:780px;display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
+.hero-text p{font-size:19px;color:var(--muted)}
+
+.graph{position:relative;display:grid;grid-template-columns:minmax(220px,300px) 1fr 1fr;column-gap:clamp(48px,7vw,96px);row-gap:20px}
+.graph svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.graph>.mono{align-self:end}
+.goals{grid-column:1;grid-row:2 / span 3;display:flex;flex-direction:column;gap:16px;align-self:start;position:relative;z-index:1}
+.goal{font:inherit;font-size:18px;font-weight:600;text-align:left;color:var(--ink);background:var(--panel);border:1.5px solid var(--wire);border-radius:12px;padding:20px 22px;cursor:pointer;min-height:68px;transition:background .15s,color .15s,border-color .15s}
+.goal:hover{border-color:var(--accent-soft)}
+.goal[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.node{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px;padding:18px 22px;min-height:120px;background:var(--panel-dim);border:1.5px solid var(--line);border-radius:12px;text-decoration:none;color:#c3c8d1;transition:border-color .15s,background .15s,color .15s}
+.node:hover{border-color:var(--accent-soft)}
+.node .mono{color:var(--faint)}
+.node strong{font-size:20px;line-height:1.2;font-weight:600}
+.node.on{background:var(--panel);border:2px solid var(--accent);color:var(--ink)}
+.node.on .mono{color:var(--accent-soft)}
+.node.on strong{font-weight:700}
+.n1{grid-column:2}.n2{grid-column:3}
+.r1{grid-row:2}.r2{grid-row:3}.r3{grid-row:4}
+
+.route{margin-top:28px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 32px;padding:18px 28px;background:var(--panel);border:1.5px solid var(--line);border-radius:12px}
+.route .mono{color:var(--accent-soft)}
+.route p{font-size:19px;font-weight:600;margin-right:auto}
+.btn{display:inline-block;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:17px;padding:14px 26px;border-radius:8px;text-decoration:none}
+.btn:hover{background:var(--accent-soft)}
+
+/* Разделы */
+section{padding:72px 0;border-top:1px solid var(--line)}
+.sec-head{display:flex;flex-direction:column;gap:10px;margin-bottom:36px;max-width:720px}
+.sec-head p{color:var(--muted)}
+
+.courses{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:20px}
+.course{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:26px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:24px}
+.course:target{border-color:var(--accent)}
+.course .mono{color:var(--accent-soft)}
+.course p{color:var(--muted)}
+.course dl{margin:0;display:flex;flex-direction:column;gap:12px;font-size:16px}
+.course dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
+.course dd{margin:0}
+.course ul{margin:0;padding-left:18px}
+
+/* Путь */
+.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:48px;align-items:start}
+.about-text{display:flex;flex-direction:column;gap:16px}
+.about-text p{color:var(--muted)}
+.photo{aspect-ratio:4/5;max-width:320px;border:1.5px dashed var(--wire);border-radius:12px;display:grid;place-items:center;text-align:center;padding:20px;color:var(--faint);font-size:15px}
+.chain{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.chain li{position:relative;padding:0 0 22px 34px}
+.chain li::before{content:"";position:absolute;left:6px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--wire)}
+.chain li::after{content:"";position:absolute;left:11px;top:22px;bottom:-6px;width:2px;background:var(--wire)}
+.chain li:last-child::after{display:none}
+.chain li.now::before{background:var(--accent)}
+.chain b{display:block;font-size:18px;font-weight:600}
+.chain span{color:var(--muted);font-size:16px}
+
+.scene{margin:0;border:1.5px solid var(--line);border-radius:14px;overflow:hidden;line-height:0}
+.scene svg{display:block;width:100%;height:auto}
+.method{margin-top:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:16px}
+.method div{background:var(--panel-dim);border:1.5px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.method b{font-size:18px}
+.method span{color:var(--muted);font-size:15px}
+
+/* Контакты */
+.contacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:32px;align-items:start}
+.contacts dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:12px 24px;font-size:18px}
+.contacts dt{color:var(--faint)}
+.contacts dd{margin:0;overflow-wrap:anywhere}
+.contacts a:hover{color:var(--accent-soft)}
+footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--faint);font-size:14px}
+
+@media (max-width:900px){
+  .graph{grid-template-columns:1fr;row-gap:14px}
+  .graph svg,.graph>.mono{display:none}
+  .goals{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+  .goal{min-height:48px;padding:12px 16px;font-size:16px}
+  .node{grid-column:1;grid-row:auto;display:none}
+  .node.on{display:flex}
+  .node.n1.on::after{content:"";position:absolute;left:32px;bottom:-16px;width:2px;height:14px;background:var(--accent)}
+  .about{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap" id="top">
+  <nav class="nav" aria-label="Разделы сайта">
+    <a class="brand" href="#top">Антон Данилов</a>
+    <a href="#courses">Курсы</a>
+    <a href="#about">Обо мне</a>
+    <a class="cta" href="#contacts">Написать мне</a>
+  </nav>
+</header>
+
+<main>
+<div class="wrap hero">
+  <div class="hero-text">
+    <h1>Выберите цель. Я покажу маршрут</h1>
+    <p>Шесть курсов по 3D, Unreal Engine и нейросетям для взрослых. С какого начать, зависит от того, что вы хотите делать.</p>
+  </div>
+
+  <div class="graph" id="graph">
+    <svg id="wires" aria-hidden="true"></svg>
+    <span class="mono" style="grid-column:1;grid-row:1">Цель</span>
+    <span class="mono" style="grid-column:2;grid-row:1">Первый курс</span>
+    <span class="mono" style="grid-column:3;grid-row:1">Следующий курс</span>
+
+    <div class="goals" role="group" aria-label="Ваша цель">
+      <button class="goal" type="button" id="goal-games" data-route="games" aria-pressed="true">Хочу делать игры</button>
+      <button class="goal" type="button" id="goal-film" data-route="film" aria-pressed="false">Хочу снимать кино и рекламу</button>
+      <button class="goal" type="button" id="goal-ai" data-route="ai" aria-pressed="false">Хочу работать с нейросетями</button>
+    </div>
+
+    <a class="node n1 r1 on" id="n-3d" data-route="games" href="#c-3d"><span class="mono">Курс · 40 часов</span><strong>Как создавать 3D-модели для игр</strong></a>
+    <a class="node n2 r1 on" id="n-ue" data-route="games" href="#c-ue"><span class="mono">Курс · 50 часов</span><strong>Как делать игры в Unreal Engine 5</strong></a>
+    <a class="node n1 r2" id="n-vfx" data-route="film" href="#c-vfx"><span class="mono">Курс · 35 часов</span><strong>Как создавать визуальные эффекты для видео</strong></a>
+    <a class="node n2 r2" id="n-vp" data-route="film" href="#c-vp"><span class="mono">Курс · 30 часов</span><strong>Как снимать кино в Unreal Engine</strong></a>
+    <a class="node n1 r3" id="n-photo" data-route="ai" href="#c-photo"><span class="mono">Курс · 20 часов</span><strong>Как использовать нейросети в фотографии</strong></a>
+    <a class="node n2 r3" id="n-clip" data-route="ai" href="#c-clip"><span class="mono">Курс · 25 часов</span><strong>Как снять музыкальный клип с помощью нейросетей</strong></a>
+  </div>
+
+  <div class="route" aria-live="polite">
+    <span class="mono">Ваш маршрут</span>
+    <p id="route-text">2 курса · 90 часов · от первой модели до своей игры</p>
+    <a class="btn" href="#contacts">Записаться на первый курс</a>
+  </div>
+</div>
+
+<section id="courses">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Курсы</h2>
+      <p>Каждый курс начинается с нуля и заканчивается готовой работой. На занятии около трети времени занимает теория, остальное практика.</p>
+    </div>
+    <div class="courses">
+      <article class="course" id="c-3d">
+        <span class="mono">Игры · 40 часов</span>
+        <h3>Как создавать 3D-модели для игр</h3>
+        <p>С нуля до готовой игровой модели в Blender: форма, развёртка, текстуры и перенос в игровой движок.</p>
+        <dl>
+          <div><dt>Для кого</dt><dd>Для новичков без опыта в 3D и для тех, кто хочет собрать первое портфолио.</dd></div>
+          <div><dt>Чему научитесь</dt><dd><ul><li>Моделировать объекты с геометрией, которая подходит для игр</li><li>Делать развёртку и текстуры</li><li>Переносить модель в Unreal Engine</li></ul></dd></div>
+          <div><dt>Что понадобится</dt><dd>Компьютер с дискретной видеокартой и мышь с колёсиком. Blender бесплатный.</dd></div>
+        </dl>
+      </article>
+      <article class="course" id="c-ue">
+        <span class="mono">Игры · 50 часов</span>
+        <h3>Как делать игры в Unreal Engine 5</h3>
+        <p>От первого запуска до интерактивной сцены со светом, материалами и простой игровой механикой.</p>
+        <dl>
+          <div><dt>Для кого</dt><dd>Для 3D-художников, дизайнеров и всех, кто хочет делать игры. Программировать уметь не нужно.</dd></div>
+          <div><dt>Чему научитесь</dt><dd><ul><li>Собирать игровые уровни и окружение</li><li>Настраивать материалы и освещение</li><li>Создавать механику в Blueprints, без кода</li></ul></dd></div>
+          <div><dt>Что понадобится</dt><dd>Windows 10 или 11, видеокарта от 8 ГБ, от 16 ГБ памяти. Unreal Engine 5 бесплатный.</dd></div>
+        </dl>
+      </article>
+      <article class="course" id="c-vfx">
+        <span class="mono">Кино и реклама · 35 часов</span>
+        <h3>Как создавать визуальные эффекты для видео</h3>
+        <p>Зелёный фон, вырезание объектов, отслеживание камеры и 3D-графика в живом видео: задачи, которые каждый день решают рекламные и киностудии.</p>
+        <dl>
+          <div><dt>Для кого</dt><dd>Для видеографов, монтажёров и всех, кто работает с видео. Опыт монтажа полезен, но не обязателен.</dd></div>
+          <div><dt>Чему научитесь</dt><dd><ul><li>Работать в DaVinci Resolve</li><li>Заменять фон и совмещать слои видео и графики</li><li>Встраивать 3D-графику и делать цветокоррекцию</li></ul></dd></div>
+          <div><dt>Что понадобится</dt><dd>Компьютер с дискретной видеокартой, от 16 ГБ памяти. Бесплатной версии DaVinci Resolve хватает на весь курс.</dd></div>
+        </dl>
+      </article>
+      <article class="course" id="c-vp">
+        <span class="mono">Кино и реклама · 30 часов</span>
+        <h3>Как снимать кино в Unreal Engine</h3>
+        <p>Виртуальное производство: строим декорацию в движке, ставим свет и камеру и получаем готовые кадры без выездной съёмки.</p>
+        <dl>
+          <div><dt>Для кого</dt><dd>Для видеографов, операторов и 3D-художников, которым интересна съёмка в виртуальной студии.</dd></div>
+          <div><dt>Чему научитесь</dt><dd><ul><li>Собирать виртуальную локацию</li><li>Работать с камерой и светом в Unreal Engine 5</li><li>Снимать и рендерить сцену прямо в движке</li></ul></dd></div>
+          <div><dt>Что понадобится</dt><dd>Windows 10 или 11, видеокарта от 8 ГБ, от 16 ГБ памяти. Unreal Engine 5 бесплатный.</dd></div>
+        </dl>
+      </article>
+      <article class="course" id="c-photo">
+        <span class="mono">Нейросети · 20 часов</span>
+        <h3>Как использовать нейросети в фотографии</h3>
+        <p>Практический курс о новых возможностях для создания и обработки фотографий. Никакого программирования, только работа с настоящими снимками.</p>
+        <dl>
+          <div><dt>Для кого</dt><dd>Для фотографов и всех, кто снимает и хочет работать быстрее.</dd></div>
+          <div><dt>Чему научитесь</dt><dd><ul><li>Делать умную ретушь</li><li>Создавать и заменять фон</li><li>Стилизовать снимки</li></ul></dd></div>
+          <div><dt>Что понадобится</dt><dd>Компьютер или ноутбук и свои фотографии для практики.</dd></div>
+        </dl>
+      </article>
+      <article class="course" id="c-clip">
+        <span class="mono">Нейросети · 25 часов</span>
+        <h3>Как снять музыкальный клип с помощью нейросетей</h3>
+        <p>От идеи и трека в Suno через видеоряд в Higgsfield до монтажа в DaVinci Resolve. Без камеры, актёров и студии звукозаписи.</p>
+        <dl>
+          <div><dt>Для кого</dt><dd>Для музыкантов, блогеров и авторов контента. Специальное образование не нужно.</dd></div>
+          <div><dt>Чему научитесь</dt><dd><ul><li>Создавать трек и видеоряд по описанию</li><li>Делать раскадровку и монтировать в ритм музыки</li><li>Готовить клип для YouTube и соцсетей</li></ul></dd></div>
+          <div><dt>Что понадобится</dt><dd>Компьютер, стабильный интернет и аккаунты Suno и Higgsfield. У Higgsfield подписка платная.</dd></div>
+        </dl>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="lessons">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Как проходит занятие</h2>
+      <p>Я показываю задачу на большом экране, вы повторяете её на своём ноутбуке. Группы небольшие, поэтому я успеваю подойти к каждому.</p>
+    </div>
+    <figure class="scene">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-label="Рисунок: преподаватель показывает на доске 3D-модель и схему из нод, четверо учеников сидят за столом с ноутбуками"><rect width="1200" height="560" rx="14" fill="#1c1f24"/><rect x="0" y="440" width="1200" height="120" fill="#181a1e"/><rect x="330" y="56" width="540" height="270" rx="10" fill="#22252b" stroke="#3a3f49" stroke-width="3"/><path d="M360 90h120M360 292h70" stroke="#4a505c" stroke-width="6" stroke-linecap="round"/><g fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"><polygon points="470,130 530,160 470,190 410,160"/><polygon points="410,160 470,190 470,250 410,220"/><polygon points="470,190 530,160 530,220 470,250"/></g><g fill="#fb923c"><circle cx="470" cy="130" r="4"/><circle cx="530" cy="160" r="4"/><circle cx="470" cy="190" r="4"/><circle cx="410" cy="160" r="4"/><circle cx="470" cy="250" r="4"/><circle cx="410" cy="220" r="4"/><circle cx="530" cy="220" r="4"/></g><g fill="#1c1f24" stroke="#4a505c" stroke-width="2.5"><rect x="610" y="110" width="90" height="40" rx="8"/><rect x="610" y="210" width="90" height="40" rx="8"/></g><rect x="740" y="150" width="100" height="40" rx="8" fill="#1c1f24" stroke="#fb923c" stroke-width="2.5"/><path d="M700 130C720 130 720 170 740 170M700 230C720 230 720 170 740 170" fill="none" stroke="#fb923c" stroke-width="2.5"/><g fill="#fb923c"><circle cx="700" cy="130" r="4"/><circle cx="700" cy="230" r="4"/><circle cx="740" cy="170" r="4"/></g><ellipse cx="1040" cy="446" rx="62" ry="8" fill="#101216"/><rect x="1000" y="366" width="36" height="78" rx="8" fill="#2a2e36"/><rect x="1044" y="366" width="36" height="78" rx="8" fill="#2a2e36"/><circle cx="1012" cy="150" r="16" fill="#6f6a66"/><circle cx="1020" cy="132" r="16" fill="#6f6a66"/><circle cx="1040" cy="124" r="16" fill="#6f6a66"/><circle cx="1060" cy="132" r="16" fill="#6f6a66"/><circle cx="1068" cy="150" r="16" fill="#6f6a66"/><circle cx="1008" cy="168" r="16" fill="#6f6a66"/><circle cx="1072" cy="168" r="16" fill="#6f6a66"/><rect x="1028" y="202" width="24" height="26" rx="8" fill="#e3b48f"/><path d="M990 252q0-30 50-30q50 0 50 30v126h-100z" fill="#c8552b"/><path d="M1026 222l14 20-22 8zM1054 222l-14 20 22 8z" fill="#f7f9fc"/><path d="M1040 250v120" stroke="#000" stroke-opacity=".18" stroke-width="3"/><path d="M996 252L936 214" stroke="#c8552b" stroke-width="22" stroke-linecap="round"/><circle cx="928" cy="209" r="11" fill="#f0c9a8"/><path d="M1084 254L1094 330" stroke="#c8552b" stroke-width="22" stroke-linecap="round"/><circle cx="1095" cy="340" r="10" fill="#f0c9a8"/><circle cx="1007" cy="176" r="6" fill="#e3b48f"/><circle cx="1073" cy="176" r="6" fill="#e3b48f"/><ellipse cx="1040" cy="172" rx="32" ry="38" fill="#f0c9a8"/><circle cx="1022" cy="142" r="12" fill="#6f6a66"/><circle cx="1040" cy="137" r="12" fill="#6f6a66"/><circle cx="1058" cy="142" r="12" fill="#6f6a66"/><circle cx="1028" cy="178" r="2.4" fill="#2b2b2b"/><circle cx="1052" cy="178" r="2.4" fill="#2b2b2b"/><path d="M1031 194q9 7 18 0" fill="none" stroke="#a8553f" stroke-width="2.6" stroke-linecap="round"/><rect x="50" y="400" width="900" height="16" rx="4" fill="#2f343d"/><rect x="184" y="338" width="84" height="58" rx="5" fill="#101216" stroke="#4a505c" stroke-width="2.5"/><rect x="191" y="345" width="70" height="44" rx="2" fill="#fb923c" fill-opacity=".14"/><g fill="none" stroke="#fb923c" stroke-width="1.6"><polygon points="226,353 240,360 226,367 212,360"/><path d="M212 360v14l14 7 14-7v-14M226 367v14"/></g><rect x="176" y="394" width="100" height="7" rx="3" fill="#4a505c"/><rect x="414" y="338" width="84" height="58" rx="5" fill="#101216" stroke="#4a505c" stroke-width="2.5"/><rect x="421" y="345" width="70" height="44" rx="2" fill="#fb923c" fill-opacity=".14"/><g fill="none" stroke="#fb923c" stroke-width="1.6"><polygon points="456,353 470,360 456,367 442,360"/><path d="M442 360v14l14 7 14-7v-14M456 367v14"/></g><rect x="406" y="394" width="100" height="7" rx="3" fill="#4a505c"/><rect x="644" y="338" width="84" height="58" rx="5" fill="#101216" stroke="#4a505c" stroke-width="2.5"/><rect x="651" y="345" width="70" height="44" rx="2" fill="#fb923c" fill-opacity=".14"/><g fill="none" stroke="#fb923c" stroke-width="1.6"><polygon points="686,353 700,360 686,367 672,360"/><path d="M672 360v14l14 7 14-7v-14M686 367v14"/></g><rect x="636" y="394" width="100" height="7" rx="3" fill="#4a505c"/><rect x="874" y="338" width="84" height="58" rx="5" fill="#101216" stroke="#4a505c" stroke-width="2.5"/><rect x="881" y="345" width="70" height="44" rx="2" fill="#fb923c" fill-opacity=".14"/><g fill="none" stroke="#fb923c" stroke-width="1.6"><polygon points="916,353 930,360 916,367 902,360"/><path d="M902 360v14l14 7 14-7v-14M916 367v14"/></g><rect x="866" y="394" width="100" height="7" rx="3" fill="#4a505c"/><path d="M62 560c0-72 36-98 78-98s78 26 78 98z" fill="#2f4a7a"/><rect x="127" y="446" width="26" height="26" rx="8" fill="#e3b48f"/><path d="M100 420c0-30 18-46 40-46s40 16 40 46v62h-80z" fill="#5a3b2e"/><path d="M292 560c0-72 36-98 78-98s78 26 78 98z" fill="#2c7a74"/><rect x="357" y="446" width="26" height="26" rx="8" fill="#e3b48f"/><circle cx="334" cy="424" r="7" fill="#e3b48f"/><circle cx="406" cy="424" r="7" fill="#e3b48f"/><ellipse cx="370" cy="420" rx="36" ry="42" fill="#3a2c25"/><path d="M522 560c0-72 36-98 78-98s78 26 78 98z" fill="#6b3f73"/><rect x="587" y="446" width="26" height="26" rx="8" fill="#e3b48f"/><circle cx="564" cy="424" r="7" fill="#e3b48f"/><circle cx="636" cy="424" r="7" fill="#e3b48f"/><circle cx="600" cy="372" r="18" fill="#b9b4ae"/><ellipse cx="600" cy="420" rx="36" ry="42" fill="#b9b4ae"/><path d="M752 560c0-72 36-98 78-98s78 26 78 98z" fill="#3f6b45"/><rect x="817" y="446" width="26" height="26" rx="8" fill="#e3b48f"/><circle cx="794" cy="424" r="7" fill="#e3b48f"/><circle cx="866" cy="424" r="7" fill="#e3b48f"/><ellipse cx="830" cy="420" rx="36" ry="42" fill="#b9682d"/></svg>
+    </figure>
+    <div class="method" aria-label="Как устроено занятие">
+      <div><span class="mono">Шаг 1</span><b>Теория</b><span>Коротко: что делаем и зачем это нужно в работе.</span></div>
+      <div><span class="mono">Шаг 2</span><b>Показ</b><span>Я делаю задачу на экране, вы видите каждый шаг.</span></div>
+      <div><span class="mono">Шаг 3</span><b>Практика</b><span>Вы повторяете сами, я помогаю тем, кто застрял.</span></div>
+      <div><span class="mono">Шаг 4</span><b>Разбор</b><span>Смотрим работы вместе, как на студийном просмотре.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Обо мне</h2>
+      <p>Больше двадцати лет я делаю графику для игр, рекламы и кино. На занятиях я не пересказываю учебники, а даю задачи из настоящего производства.</p>
+    </div>
+    <div class="about">
+      <div class="about-text">
+        <div class="photo">[ВАШЕ ФОТО]<br>Портрет, вертикальный кадр</div>
+        <p>В Gorodenkoff Productions я с нуля построил отдел виртуального производства на Unreal Engine 5 и руководил им. До этого работал ведущим художником в игровой студии и в рекламных студиях Таллинна, Риги и Москвы.</p>
+        <p>Преподаю взрослым с 2020 года: первый курс по 3D провёл в Cinemer Meediakool.</p>
+      </div>
+      <ol class="chain">
+        <li><b>Ringtail Studios</b><span>Ведущий художник, графика для игр</span></li>
+        <li><b>Motion Studios и Leo Burnett Kontuur, Таллинн</b><span>3D и анимация для рекламы</span></li>
+        <li><b>Vilks Postproduction, Рига</b><span>Постпродакшн и визуальные эффекты</span></li>
+        <li><b>CG Company, Москва</b><span>Компьютерная графика для кино и рекламы</span></li>
+        <li><b>Gorodenkoff Productions, Таллинн</b><span>Создал и возглавил отдел виртуального производства на Unreal Engine 5</span></li>
+        <li class="now"><b>Преподавание</b><span>Курсы для взрослых в Cinemer Meediakool</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="contacts">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Записаться или задать вопрос</h2>
+      <p>Напишите, какая у вас цель и был ли опыт. Я отвечу, с какого курса лучше начать и когда стартует ближайшая группа.</p>
+    </div>
+    <div class="contacts">
+      <dl>
+        <dt>Почта</dt><dd>[ВАША ПОЧТА]</dd>
+        <dt>Где</dt><dd>Cinemer Meediakool, Таллинн</dd>
+        <dt>Старт</dt><dd>[ДАТА БЛИЖАЙШЕЙ ГРУППЫ]</dd>
+      </dl>
+      <dl>
+        <dt>Работы</dt><dd><a href="https://danily4.github.io" target="_blank" rel="noopener">danily4.github.io</a></dd>
+        <dt>YouTube</dt><dd><a href="https://www.youtube.com/@AntonDanilovSP" target="_blank" rel="noopener">@AntonDanilovSP</a></dd>
+        <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/danily4" target="_blank" rel="noopener">linkedin.com/in/danily4</a></dd>
+      </dl>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">© Антон Данилов</div></footer>
+
+<script>
+(function(){
+"use strict";
+var ROUTES={
+  games:{goal:"goal-games",nodes:["n-3d","n-ue"],text:"2 курса · 90 часов · от первой модели до своей игры"},
+  film:{goal:"goal-film",nodes:["n-vfx","n-vp"],text:"2 курса · 65 часов · от первого спецэффекта до съёмки в виртуальной студии"},
+  ai:{goal:"goal-ai",nodes:["n-photo","n-clip"],text:"2 курса · 45 часов · от обработки фото до собственного клипа"}
+};
+var graph=document.getElementById("graph"),svg=document.getElementById("wires"),active="games";
+function el(id){return document.getElementById(id);}
+
+function wire(a,b,box,on){
+  var ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect();
+  var x1=ra.right-box.left,y1=ra.top+ra.height/2-box.top,x2=rb.left-box.left,y2=rb.top+rb.height/2-box.top,dx=(x2-x1)/2;
+  var c=on?"#fb923c":"#4a505c",d=on?"#fb923c":"#6b7280";
+  return '<path d="M'+x1+" "+y1+" C "+(x1+dx)+" "+y1+", "+(x2-dx)+" "+y2+", "+x2+" "+y2+'" fill="none" stroke="'+c+'" stroke-width="3" stroke-linecap="round"/>'+
+    '<circle cx="'+x1+'" cy="'+y1+'" r="6" fill="'+d+'"/><circle cx="'+x2+'" cy="'+y2+'" r="6" fill="'+d+'"/>';
+}
+function draw(){
+  if(getComputedStyle(svg).display==="none"){svg.innerHTML="";return;}
+  var box=graph.getBoundingClientRect(),out="",last="";
+  Object.keys(ROUTES).forEach(function(k){
+    var r=ROUTES[k],on=k===active;
+    var s=wire(el(r.goal),el(r.nodes[0]),box,on)+wire(el(r.nodes[0]),el(r.nodes[1]),box,on);
+    if(on)last=s;else out+=s;
+  });
+  svg.innerHTML=out+last;
+}
+function setRoute(k){
+  if(!ROUTES[k])return;
+  active=k;
+  Object.keys(ROUTES).forEach(function(id){
+    var r=ROUTES[id],on=id===k;
+    el(r.goal).setAttribute("aria-pressed",on);
+    r.nodes.forEach(function(n){el(n).classList.toggle("on",on);});
+  });
+  el("route-text").textContent=ROUTES[k].text;
+  draw();
+}
+Array.prototype.forEach.call(document.querySelectorAll(".goal"),function(b){
+  b.addEventListener("click",function(){setRoute(b.dataset.route);});
+});
+window.addEventListener("resize",draw);
+if(window.ResizeObserver){new ResizeObserver(draw).observe(graph);}
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(draw);}
+draw();
+})();
+</script>
+</body>
+</html>
